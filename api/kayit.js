@@ -1,9 +1,14 @@
-import { db } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
 
 export default async function handler(req, res) {
-  try {
-    const client = await db.connect();
+  // Tüm olası bağlantı isimlerini (POSTGRES, DB, STORAGE) kontrol eder
+  const pool = createPool({
+    connectionString: process.env.POSTGRES_URL || process.env.DB_URL || process.env.STORAGE_URL
+  });
 
+  try {
+    const client = await pool.connect();
+    
     if (req.method === 'POST') {
       const { isim_soyisim, telefon, il, ilce, semt, cadde, sokak, kisi_sayisi, alternatif_telefon } = req.body;
       
@@ -19,6 +24,6 @@ export default async function handler(req, res) {
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ hata: "Veritabanı hatası: " + error.message });
+    return res.status(500).json({ hata: "Bağlantı Hatası: " + error.message });
   }
 }
