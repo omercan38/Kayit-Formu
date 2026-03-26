@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Formu</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        input, button { display: block; width: 100%; margin-bottom: 15px; padding: 10px; box-sizing: border-box; }
+        button { background-color: #0070f3; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .kutu { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h2>Yeni Kayıt Formu</h2>
+    <form id="form">
+        <input type="text" id="isim_soyisim" placeholder="İsim Soyisim (Zorunlu)" required>
+        <input type="tel" id="telefon" placeholder="Telefon (Zorunlu)" required>
+        <input type="text" id="il" placeholder="İl (Zorunlu)" required>
+        <input type="text" id="ilce" placeholder="İlçe (Zorunlu)" required>
+        <input type="text" id="semt" placeholder="Semt (Zorunlu)" required>
+        <input type="text" id="cadde" placeholder="Cadde (Zorunlu)" required>
+        <input type="text" id="sokak" placeholder="Sokak (Zorunlu)" required>
+        <input type="number" id="kisi_sayisi" placeholder="Toplam Kişi Sayısı (Zorunlu)" required min="1">
+        <input type="tel" id="alternatif_telefon" placeholder="Alternatif Numarası (İsteğe Bağlı)">
+        
+        <button type="submit">Kaydet</button>
+    </form>
+    <p id="mesaj" style="font-weight: bold; color: green;"></p>
+
+    <hr>
+
+    <h2>Son Kayıtlar</h2>
+    <button onclick="verileriGetir()" style="background-color: #333;">Verileri Yenile</button>
+    <div id="liste">Henüz veri yok...</div>
+
+    <script>
+        document.getElementById('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const veri = {
+                isim_soyisim: document.getElementById('isim_soyisim').value,
+                telefon: document.getElementById('telefon').value,
+                il: document.getElementById('il').value,
+                ilce: document.getElementById('ilce').value,
+                semt: document.getElementById('semt').value,
+                cadde: document.getElementById('cadde').value,
+                sokak: document.getElementById('sokak').value,
+                kisi_sayisi: document.getElementById('kisi_sayisi').value,
+                alternatif_telefon: document.getElementById('alternatif_telefon').value
+            };
+
+            const response = await fetch('/api/kayit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(veri)
+            });
+
+            if (response.ok) {
+                document.getElementById('mesaj').innerText = "Kayıt başarıyla eklendi!";
+                document.getElementById('form').reset();
+                verileriGetir();
+            } else {
+                document.getElementById('mesaj').innerText = "Bir hata oluştu.";
+                document.getElementById('mesaj').style.color = "red";
+            }
+        });
+
+        async function verileriGetir() {
+            const response = await fetch('/api/kayit');
+            const data = await response.json();
+            
+            const listeDiv = document.getElementById('liste');
+            listeDiv.innerHTML = `<p>Toplam Kayıt: <b>${data.toplam}</b></p>`;
